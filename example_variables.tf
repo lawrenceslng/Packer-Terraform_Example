@@ -18,7 +18,7 @@ variable "custom_ami_id" {
 
 variable "ssh_key" {
     type        = string
-    default     = ""                            # INSERT SSH KEY PAIR NAME HERE
+    default     = "vockey"                            # INSERT SSH KEY PAIR NAME HERE
     description = "Put Your SSH Key Here"
 }
 
