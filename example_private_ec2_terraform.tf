@@ -20,7 +20,7 @@ resource "aws_security_group" "private-ec2-sg" {
 resource "aws_instance" "private_instances" {
   count                       = 6
   ami                         = var.custom_ami_id
-  key_name                    = var.ssh_key
+  key_name                    = var.private_ssh_key
   instance_type               = "t2.micro"
   subnet_id                   = module.vpc.private_subnets[0]
   vpc_security_group_ids      = [aws_security_group.private-ec2-sg.id]

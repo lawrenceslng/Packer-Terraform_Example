@@ -1,6 +1,6 @@
 variable "bastion_ingress_ip_address" {
     type        = string
-    default     = ""                            # INSERT OWN IP ADDRESS HERE
+    default     = "x.x.x.x/32"                                  # INSERT OWN IP ADDRESS HERE
     description = "Insert Your IP Address Here"
 }
 
@@ -12,13 +12,19 @@ variable "public_subnet_id" {
 
 variable "custom_ami_id" {
     type        = string
-    default     = ""                            # INSERT CUSTOM AMI ID HERE
+    default     = "ami-123123"                                  # INSERT CUSTOM AMI ID HERE
     description = "Put Your AMI Here"
 }
 
-variable "ssh_key" {
+variable "bastion_ssh_key" {
     type        = string
-    default     = "vockey"                            # INSERT SSH KEY PAIR NAME HERE
-    description = "Put Your SSH Key Here"
+    default     = "vockey"                                      # INSERT Bastion Host SSH KEY PAIR NAME HERE
+    description = "Put Your Bastion Host SSH Key Here"
+}
+
+variable "private_ssh_key" {
+    type        = string
+    default     = "private_ec2_key"                             # INSERT Private EC2 SSH KEY PAIR NAME HERE
+    description = "Put Your Private EC2 SSH Key Here"
 }
 

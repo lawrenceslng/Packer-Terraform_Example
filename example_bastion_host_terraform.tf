@@ -19,7 +19,7 @@ resource "aws_security_group" "bastion-sg" {
 
 resource "aws_instance" "bastion" {
   ami                         = "ami-08b5b3a93ed654d19"       # normal Amazon Linux AMI
-  key_name                    = var.ssh_key
+  key_name                    = var.bastion_ssh_key
   instance_type               = "t2.micro"
   subnet_id                   = module.vpc.public_subnets[0]
   vpc_security_group_ids      = [aws_security_group.bastion-sg.id]

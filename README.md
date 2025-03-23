@@ -8,7 +8,7 @@ Terraform is a tool to automate infrastructure provision and manage resources in
 
 In this example, we use Packer to create a custom AWS AMI that uses Amazon Linux with Docker installed. We then use Terraform to provision an AWS VPC along with its public/private subnets, a bastion host accessible only by our own IP address, and 6 EC2 instances in the private subnet that uses the AMI created from Packer.
 
-**Note:** Example and usage steps below are written for the AWS Academy Learner Lab. There may be slight changes needed to run in regular AWS environment.
+**Note:** Example and usage steps below are written for the AWS Academy Learner Lab and MacOS environment. There may be slight changes needed to run in other environments.
 
 ## Prerequisites
 
@@ -64,13 +64,46 @@ Clone this repository and follow along with either the manual steps or the semi-
 
 - Download the SSH Key from Learner Lab
 
-    You can download the PEM file containing your SSH Key into the root directory of this repository for use later. Make sure to run `chmod 600 <PEM file>` to make it have the correct permissions for ssh use later.
+    You can download the PEM file containing the default SSH Key (vockey) into the root directory of this repository for use later. Make sure to run `chmod 600 <PEM file>` to make it have the correct permissions for ssh use later.
 
     ![SSH Key Download](./assets/image.png)
 
 ## Manual Usage
 
-You can run the examples in this repository manually. Once you have all the prerequisites installed, you can run the following commands from the root directory in the terminal:
+You can run the examples in this repository manually. 
+
+### Step 1
+
+Decide if you want to use the provided default SSH key or generate your own for use with your bastion host and/or private EC2 instances.
+
+- If you want to use the default SSH key (vockey) to ssh into the private EC2 instances, run the following from the root directory in the terminal:
+    ```
+    ssh-keygen -y -f <PEM file>
+    ```
+    where `<PEM file>` is the default SSH key you downloaded during the prerequisite steps.
+
+    Copy the output and replace the string `REPLACE_WITH_YOUR_PUBLIC_KEY` in `example_packer.pkr.hcl` with the output.
+
+- If you want to generate your own SSH key and use that to ssh into the private EC2 instances, run the following from the root directory in the terminal:
+    ```
+    mkdir -p ./ssh_key
+
+    ssh-keygen -t rsa -b 4096 -f ./ssh_key/private_ec2_key -N ""
+
+    sed -i.bak "s|REPLACE_WITH_YOUR_PUBLIC_KEY|$(cat ./ssh_key/private_ec2_key.pub)|" example_packer.pkr.hcl
+
+    rm -f example_packer.pkr.hcl.bak
+
+    aws ec2 import-key-pair --key-name "private_ec2_key" --public-key-material fileb://ssh_key/private_ec2_key.pub
+
+    chmod 600 ./ssh_key/private_ec2_key
+    ```
+
+    This will create a new ssh key that is saved in `./ssh_key`, automatically replace the content in `example_packer.pkr.hcl`, and import the key pair to your AWS account.
+
+### Step 2
+
+You can run the following commands from the root directory in the terminal:
 
 ```
 packer init .
@@ -91,7 +124,9 @@ These steps will first initialize the Packer configuration by downloading the AW
 
 ![AMI in Console](./assets/Screenshot%202025-03-21%20at%2010.51.24 PM.png)
 
-Before running the Terraform files, you need to go into `example_variables.tf` and replace the following variables:
+### Step 3
+
+Before running the Terraform files, you need to go into `example_variables.tf` and double check/replace the following variables:
 
 - bastion_ingress_ip_address
 
@@ -101,11 +136,17 @@ Before running the Terraform files, you need to go into `example_variables.tf` a
 
     Navigate to your AWS Console once Packer build has been run and go to EC2 -> AMIs and copy the AMI ID that has the name "packer-example" and put it in line 15.
 
-- ssh_key
+- bastion_ssh_key
 
-    Replace line 21 with the name of your SSH Key that you intend to use to ssh into the bastion host and private EC2 instances. In the Learner's Lab, `vockey` is the default SSH key already created, but you can replace this with an SSH key that has the proper permissions.
+    Replace line 21 with the name of your SSH Key that you intend to use to ssh into the bastion host. In the Learner's Lab, `vockey` is the default SSH key already created, so we will use this to log into the bastion host, but you can replace with a different one that exists if you want.
 
-Once these variables are set, you can run the commands:
+- private_ssh_key
+
+    Replace line 27 with the name of your SSH Key that you intend to use to ssh into the private EC2 instances (via your bastion host). Use `vockey` if you are using the default SSH Key or use `private_ec2_key` if you generated your own during step 1.
+
+### Step 4
+
+Now you can run the commands:
 
 ```
 terraform init
@@ -122,6 +163,8 @@ These steps will first initialize the terraform directory and downloads the `aws
 
 ![Terraform Validate and Apply](./assets/Screenshot%202025-03-22%20at%2012.40.04 AM.png)
 
+### Step 5 (Results)
+
 You should now see the infrastructure created.
 
 ![Terraform Complete](./assets/Screenshot%202025-03-22%20at%2012.40.16 AM.png)
@@ -134,9 +177,9 @@ Private EC2 Instances:
 
 You can ssh into your bastion host using the following command:
 ```
-chmod 600 <FILEPATH TO PEM FILE DOWNLOADED FROM LEARNER LAB>
-ssh-add <FILEPATH TO PEM FILE DOWNLOADED FROM LEARNER LAB>
-ssh -A -i <PEM FILE FILEPATH> ec2-user@<BASTION_HOST_IP>
+chmod 600 <PEM_FILE_FOR_BASTION_HOST>
+ssh-add <PEM_FILE_FOR_PRIVATE_EC2_INSTANCES>
+ssh -A -i <PEM_FILE_FOR_BASTION_HOST> ec2-user@<BASTION_HOST_IP>
 ```
 
 Once inside the bastion host, you can further ssh into any of the private EC2 instances by simply running:
@@ -144,11 +187,17 @@ Once inside the bastion host, you can further ssh into any of the private EC2 in
 ssh ec2-user@<PRIVATE_EC2_INSTANCE_IP>
 ```
 
+### Step 6 (Clean Up)
+
 Once you are done, delete all created infrastructure by running `terraform destroy` in the terminal. Again, enter `yes` to confirm.
+
+Delete the AMI that was created as well during the packer process to avoid additional charges.
 
 ## Semi-Automated Usage
 
-A script has been provided to check if prerequisites are installed, ask for AWS credientials and run `aws configure`, run the Packer commands, and replace the necessary variables in `example_variables.tf` programmatically.
+A script has been provided for MacOS users to do some of the above manual steps more easily. It will check if prerequisites are installed, ask for AWS credentials and run `aws configure`, run the Packer commands, and replace the necessary variables in `example_variables.tf` programmatically.
+
+It will automatically use the default `vockey` as the SSH Key for ssh into the bastion host and create a separate key for the private EC2 instances.
 
 So to run the example in this repository, first ensure `setup_script.sh` is executable by running `chmod +x setup_script.sh`, then run `./setup_script.sh` in the terminal.
 
@@ -156,6 +205,7 @@ Once all is done, simply run the following commands:
 
 ```
 terraform init
+terraform fmt
 terraform validate
 terraform apply
 ```
@@ -163,6 +213,8 @@ terraform apply
 Inspect your created infrastructure in the AWS Console.
 
 Once you are done, delete all created infrastructure by running `terraform destroy` in the terminal. Again, enter `yes` to confirm.
+
+Delete the AMI that was created as well during the packer process to avoid additional charges.
 
 ## Steps
 

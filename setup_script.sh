@@ -22,17 +22,34 @@ read -p "Enter your AWS Access Key: " AWS_ACCESS_KEY
 read -p "Enter your AWS Secret Key: " AWS_SECRET_KEY
 read -p "Enter your AWS Session Token: " AWS_SESSION_TOKEN
 
-read -p "Enter your AWS SSH Key Pair Name (default is vockey): " SSH_KEY_NAME
-SSH_KEY_NAME=${SSH_KEY_NAME:-vockey}
+# read -p "Enter the SSH Key Pair Name for your Bastion Host (Press Enter to use the default: vockey): " BASTION_SSH_KEY_NAME
+# BASTION_SSH_KEY_NAME=${BASTION_SSH_KEY_NAME:-vockey}
+
+# read -p "Enter the SSH Key Pair Name for your Private EC2 Instance (Press Enter to use the default: private_ec2_key): " PRIVATE_SSH_KEY_NAME
+# PRIVATE_SSH_KEY_NAME=${PRIVATE_SSH_KEY_NAME:-private_ec2_key}
 
 # Configure AWS CLI with the provided credentials
 aws configure set aws_access_key_id "$AWS_ACCESS_KEY"
 aws configure set aws_secret_access_key "$AWS_SECRET_KEY"
 aws configure set aws_session_token "$AWS_SESSION_TOKEN"
 
+mkdir -p ./ssh_key
+
+ssh-keygen -t rsa -b 4096 -f ./ssh_key/private_ec2_key -N ""
+
+sed -i.bak "s|REPLACE_WITH_YOUR_PUBLIC_KEY|$(cat ./ssh_key/private_ec2_key.pub)|" example_packer.pkr.hcl
+
+# Clean up backup files
+rm -f example_packer.pkr.hcl.bak
+
+aws ec2 import-key-pair --key-name "private_ec2_key" --public-key-material fileb://ssh_key/private_ec2_key.pub
+
+chmod 600 ./ssh_key/private_ec2_key
+
 # Update the example_variables.tf file (fixing sed for macOS)
-sed -i.bak "s|default     = \"[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]+/32\"|default     = \"$PUBLIC_IP\"|" example_variables.tf
-sed -i.bak "s|default     = \"\"                      # INSERT SSH KEY PAIR NAME HERE|default     = \"$SSH_KEY\"|" example_variables.tf
+sed -i.bak "s|default     = \"x.x.x.x/32\"|default     = \"$PUBLIC_IP\"|" example_variables.tf
+# sed -i.bak "s|default     = \"vockey\"                      # INSERT Bastion Host SSH KEY PAIR NAME HERE   = \"$BASTION_SSH_KEY_NAME\"|" example_variables.tf
+# sed -i.bak "s|default     = \"private_ec2_key\"                      # INSERT Private EC2 SSH KEY PAIR NAME HERE   = \"$PRIVATE_SSH_KEY_NAME\"|" example_variables.tf
 
 # Run Packer commands
 packer init .
@@ -42,7 +59,7 @@ packer fmt .
 AMI_ID=$(packer build . | tee /dev/tty | grep -o 'ami-[a-zA-Z0-9]*' | tail -1)
 
 # Update the example_variables.tf file with the new AMI ID
-sed -i.bak "s|default     = \"ami-[a-zA-Z0-9]\+\"|default     = \"$AMI_ID\"|" example_variables.tf
+sed -i.bak "s|default     = \"ami-123123\"|default     = \"$AMI_ID\"|" example_variables.tf
 
 # Clean up backup files
-rm -f example_variables.tf.bak
+# rm -f example_variables.tf.bak
