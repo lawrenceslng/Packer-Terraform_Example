@@ -27,7 +27,9 @@ Before starting, you should make sure you have the following installed:
     Run `packer` in the terminal to verify installation is successful
 
     ![Packer Install 1](./assets/Screenshot%202025-03-21%20at%2010.43.45 PM.png)
+    
     ![Packer Install 2](./assets/Screenshot%202025-03-21%20at%2010.43.57 PM.png)
+    
     ![Packer Install 3](./assets/Screenshot%202025-03-21%20at%2010.44.08 PM.png)
 
 - Terraform
@@ -36,18 +38,20 @@ Before starting, you should make sure you have the following installed:
 
     For MacOS users using homebrew, you can simply run the following commands:
     ```
-    brew tap hashicorp/tap
+    brew tap hashicorp/tap                  # if not already run
     brew install hashicorp/tap/terraform
     ```
 
     Run `terraform -help` in the terminal to verify installation is successful    
+
+    ![Terraform Install 1](./assets/Screenshot%202025-03-21%20at%2010.56.29 PM.png)
 
 - AWS CLI
 
     Download AWS CLI using the link and instructions here:
     https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
 
-    Configure your AWS CLI using Short-term credentials as shown here:
+    Configure your AWS CLI using Short-term credentials as shown here (if doing manual usage):
     https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html
 
     Or simply run the following commands and follow the instructions:
@@ -77,6 +81,14 @@ packer build example_packer.pkr.hcl
 
 These steps will first initialize the Packer configuration by downloading the AWS plugin as defined in `example_packer.pkr.hcl`, which is our Packer configuration file. Then, Packer will format the template(s) in the current directory and validate the configurations. Finally, Packer will build the AMI and push the image to your AWS account. ([source](https://developer.hashicorp.com/packer/tutorials/aws-get-started/aws-get-started-build-image))
 
+![Packer Build Start](./assets/Screenshot%202025-03-21%20at%2010.48.03 PM.png)
+
+![Packer Image VM Start](./assets/Screenshot%202025-03-21%20at%2010.48.21 PM.png)
+
+![Packer Build Finished](./assets/Screenshot%202025-03-21%20at%2010.51.13 PM.png)
+
+![AMI in Console](./assets/Screenshot%202025-03-21%20at%2010.51.24 PM.png)
+
 Before running the Terraform files, you need to go into `example_variables.tf` and replace the following variables:
 
 - bastion_ingress_ip_address
@@ -102,7 +114,13 @@ terraform apply
 
 These steps will first initialize the terraform directory and downloads the `aws` provider. Then it will format and valide your configuration to ensure they are valid. Finally it will create the infrastructure defined in the configuration in your AWS environment. 
 
+![Terraform Init](./assets/Screenshot%202025-03-21%20at%2011.37.22 PM.png)
+
+![Terraform Validate and Apply](./assets/Screenshot%202025-03-22%20at%2012.40.04 AM.png)
+
 You should now see the infrastructure created.
+
+![Terraform Complete](./assets/Screenshot%202025-03-22%20at%2012.40.16 AM.png)
 
 VPC:
 
