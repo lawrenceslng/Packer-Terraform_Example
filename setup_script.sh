@@ -23,6 +23,7 @@ read -p "Enter your AWS Secret Key: " AWS_SECRET_KEY
 read -p "Enter your AWS Session Token: " AWS_SESSION_TOKEN
 
 read -p "Enter your AWS SSH Key Pair Name (default is vockey): " SSH_KEY_NAME
+SSH_KEY_NAME=${SSH_KEY_NAME:-vockey}
 
 # Configure AWS CLI with the provided credentials
 aws configure set aws_access_key_id "$AWS_ACCESS_KEY"
@@ -33,7 +34,7 @@ aws configure set aws_session_token "$AWS_SESSION_TOKEN"
 sed -i "s|default     = \"[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]+/32\"|default     = \"$PUBLIC_IP\"|" example_variables.tf
 
 # Update the example_variables.tf file with the SSH key pair name
-sed -i "s|default     = ""                      # INSERT SSH KEY PAIR NAME HERE|default     = "$SSH_KEY"|" example_variables.tf
+sed -i "s|default     = ""                      # INSERT SSH KEY PAIR NAME HERE|default     = "$SSH_KEY_NAME"|" example_variables.tf
 
 # Run Packer commands
 packer init .

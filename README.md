@@ -64,7 +64,7 @@ Before starting, you should make sure you have the following installed:
 
 - Download the SSH Key from Learner Lab
 
-    You can download the PEM file containing your SSH Key into the root directory of this repository for use later.
+    You can download the PEM file containing your SSH Key into the root directory of this repository for use later. Make sure to run `chmod 600 <PEM file>` to make it have the correct permissions for ssh use later.
 
     ![SSH Key Download](./assets/image.png)
 
@@ -81,6 +81,8 @@ packer build example_packer.pkr.hcl
 
 These steps will first initialize the Packer configuration by downloading the AWS plugin as defined in `example_packer.pkr.hcl`, which is our Packer configuration file. Then, Packer will format the template(s) in the current directory and validate the configurations. Finally, Packer will build the AMI and push the image to your AWS account. ([source](https://developer.hashicorp.com/packer/tutorials/aws-get-started/aws-get-started-build-image))
 
+![Packer Init](./assets/packer_init.png)
+
 ![Packer Build Start](./assets/Screenshot%202025-03-21%20at%2010.48.03 PM.png)
 
 ![Packer Image VM Start](./assets/Screenshot%202025-03-21%20at%2010.48.21 PM.png)
@@ -93,11 +95,11 @@ Before running the Terraform files, you need to go into `example_variables.tf` a
 
 - bastion_ingress_ip_address
 
-    Put your public facing IP address in line 3. You can find your IP address using `curl -4 ifconfig.me` in your terminal or using https://whatismyipaddress.com/
+    Put your public facing IP address in line 3 with `/32` appended. You can find your IP address using `curl -4 ifconfig.me` in your terminal or using https://whatismyipaddress.com/. Example: `8.8.8.8/32`
 
 - custom_ami_id
 
-    Navigate to your AWS Console once Packer build has been run and go to EC2 -> AMIs and copy the AMI ID that has the name "packer-example" and put it in line 15. See image for example:
+    Navigate to your AWS Console once Packer build has been run and go to EC2 -> AMIs and copy the AMI ID that has the name "packer-example" and put it in line 15.
 
 - ssh_key
 
@@ -111,6 +113,8 @@ terraform fmt
 terraform validate
 terraform apply
 ```
+
+Enter `yes` during the apply step to confirm that the infrastructure should be created.
 
 These steps will first initialize the terraform directory and downloads the `aws` provider. Then it will format and valide your configuration to ensure they are valid. Finally it will create the infrastructure defined in the configuration in your AWS environment. 
 
@@ -129,13 +133,18 @@ Bastion Host:
 Private EC2 Instances:
 
 You can ssh into your bastion host using the following command:
-`ssh-add <FILEPATH TO PEM FILE DOWNLOADED FROM LEARNER LAB>`
-`ssh -A -i <PEM FILE FILEPATH> ec2-user@<BASTION_HOST_IP>`
+```
+chmod 600 <FILEPATH TO PEM FILE DOWNLOADED FROM LEARNER LAB>
+ssh-add <FILEPATH TO PEM FILE DOWNLOADED FROM LEARNER LAB>
+ssh -A -i <PEM FILE FILEPATH> ec2-user@<BASTION_HOST_IP>
+```
 
 Once inside the bastion host, you can further ssh into any of the private EC2 instances by simply running:
-`ssh ec2-user@<PRIVATE_EC2_INSTANCE_IP>`
+```
+ssh ec2-user@<PRIVATE_EC2_INSTANCE_IP>
+```
 
-Once you are done, delete all created infrastructure by running `terraform destroy` in the terminal.
+Once you are done, delete all created infrastructure by running `terraform destroy` in the terminal. Again, enter `yes` to confirm.
 
 ## Semi-Automated Usage
 
@@ -153,7 +162,7 @@ terraform apply
 
 Inspect your created infrastructure in the AWS Console.
 
-Once you are done, delete all created infrastructure by running `terraform destroy` in the terminal.
+Once you are done, delete all created infrastructure by running `terraform destroy` in the terminal. Again, enter `yes` to confirm.
 
 ## Steps
 
