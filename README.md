@@ -12,7 +12,7 @@ In this example, we use Packer to create a custom AWS AMI that uses Amazon Linux
 
 ## Prerequisites
 
-Before starting, you should make sure you have the following installed:
+Clone this repository and follow along with either the manual steps or the semi-automated steps. But before starting, you should make sure you have the following installed:
 
 - Packer
 

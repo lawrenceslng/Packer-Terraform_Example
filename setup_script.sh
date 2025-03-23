@@ -30,18 +30,19 @@ aws configure set aws_access_key_id "$AWS_ACCESS_KEY"
 aws configure set aws_secret_access_key "$AWS_SECRET_KEY"
 aws configure set aws_session_token "$AWS_SESSION_TOKEN"
 
-# Update the example_variables.tf file with the new IP address
-sed -i "s|default     = \"[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]+/32\"|default     = \"$PUBLIC_IP\"|" example_variables.tf
-
-# Update the example_variables.tf file with the SSH key pair name
-sed -i "s|default     = ""                      # INSERT SSH KEY PAIR NAME HERE|default     = "$SSH_KEY_NAME"|" example_variables.tf
+# Update the example_variables.tf file (fixing sed for macOS)
+sed -i.bak "s|default     = \"[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]+/32\"|default     = \"$PUBLIC_IP\"|" example_variables.tf
+sed -i.bak "s|default     = \"\"                      # INSERT SSH KEY PAIR NAME HERE|default     = \"$SSH_KEY\"|" example_variables.tf
 
 # Run Packer commands
 packer init .
 packer fmt .
 
-# Capture the AMI ID from Packer build output
-AMI_ID=$(packer build . | tee /dev/tty | grep -oP 'ami-[a-zA-Z0-9]+' | tail -1)
+# Capture the AMI ID from Packer build output (fixing grep for macOS)
+AMI_ID=$(packer build . | tee /dev/tty | grep -o 'ami-[a-zA-Z0-9]*' | tail -1)
 
 # Update the example_variables.tf file with the new AMI ID
-sed -i "s|default     = \"ami-[a-zA-Z0-9]\+\"|default     = \"$AMI_ID\"|" example_variables.tf
+sed -i.bak "s|default     = \"ami-[a-zA-Z0-9]\+\"|default     = \"$AMI_ID\"|" example_variables.tf
+
+# Clean up backup files
+rm -f example_variables.tf.bak
