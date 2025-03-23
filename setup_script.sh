@@ -22,12 +22,6 @@ read -p "Enter your AWS Access Key: " AWS_ACCESS_KEY
 read -p "Enter your AWS Secret Key: " AWS_SECRET_KEY
 read -p "Enter your AWS Session Token: " AWS_SESSION_TOKEN
 
-# read -p "Enter the SSH Key Pair Name for your Bastion Host (Press Enter to use the default: vockey): " BASTION_SSH_KEY_NAME
-# BASTION_SSH_KEY_NAME=${BASTION_SSH_KEY_NAME:-vockey}
-
-# read -p "Enter the SSH Key Pair Name for your Private EC2 Instance (Press Enter to use the default: private_ec2_key): " PRIVATE_SSH_KEY_NAME
-# PRIVATE_SSH_KEY_NAME=${PRIVATE_SSH_KEY_NAME:-private_ec2_key}
-
 # Configure AWS CLI with the provided credentials
 aws configure set aws_access_key_id "$AWS_ACCESS_KEY"
 aws configure set aws_secret_access_key "$AWS_SECRET_KEY"
@@ -48,8 +42,6 @@ chmod 600 ./ssh_key/private_ec2_key
 
 # Update the example_variables.tf file (fixing sed for macOS)
 sed -i.bak "s|default     = \"x.x.x.x/32\"|default     = \"$PUBLIC_IP\"|" example_variables.tf
-# sed -i.bak "s|default     = \"vockey\"                      # INSERT Bastion Host SSH KEY PAIR NAME HERE   = \"$BASTION_SSH_KEY_NAME\"|" example_variables.tf
-# sed -i.bak "s|default     = \"private_ec2_key\"                      # INSERT Private EC2 SSH KEY PAIR NAME HERE   = \"$PRIVATE_SSH_KEY_NAME\"|" example_variables.tf
 
 # Run Packer commands
 packer init .
@@ -62,4 +54,4 @@ AMI_ID=$(packer build . | tee /dev/tty | grep -o 'ami-[a-zA-Z0-9]*' | tail -1)
 sed -i.bak "s|default     = \"ami-123123\"|default     = \"$AMI_ID\"|" example_variables.tf
 
 # Clean up backup files
-# rm -f example_variables.tf.bak
+rm -f example_variables.tf.bak

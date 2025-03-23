@@ -12,7 +12,7 @@ In this example, we use Packer to create a custom AWS AMI that uses Amazon Linux
 
 ## Prerequisites
 
-Clone this repository and follow along with either the manual steps or the semi-automated steps. But before starting, you should make sure you have the following installed:
+Clone this repository and `cd` into the root directory. You can follow along with either the manual steps or the semi-automated steps. But before starting, you should make sure you have the following installed:
 
 - Packer
 
@@ -64,7 +64,7 @@ Clone this repository and follow along with either the manual steps or the semi-
 
 - Download the SSH Key from Learner Lab
 
-    You can download the PEM file containing the default SSH Key (vockey) into the root directory of this repository for use later. Make sure to run `chmod 600 <PEM file>` to make it have the correct permissions for ssh use later.
+    You can download the PEM file containing the default SSH Key (vockey) from Learner's Lab into the root directory of this repository for use later. Make sure to run `chmod 600 <PEM file>` to make it have the correct permissions for ssh use later.
 
     ![SSH Key Download](./assets/image.png)
 
@@ -84,6 +84,8 @@ Decide if you want to use the provided default SSH key or generate your own for 
 
     Copy the output and replace the string `REPLACE_WITH_YOUR_PUBLIC_KEY` in `example_packer.pkr.hcl` with the output.
 
+    ![SSH Key Gen](./assets/Screenshot%202025-03-23%20at%202.06.34 PM.png)
+
 - If you want to generate your own SSH key and use that to ssh into the private EC2 instances, run the following from the root directory in the terminal:
     ```
     mkdir -p ./ssh_key
@@ -101,6 +103,13 @@ Decide if you want to use the provided default SSH key or generate your own for 
 
     This will create a new ssh key that is saved in `./ssh_key`, automatically replace the content in `example_packer.pkr.hcl`, and import the key pair to your AWS account.
 
+    ![SSH Key Gen 1](./assets/Screenshot%202025-03-23%20at%202.41.20 PM.png)
+
+    ![SSH Key Gen 2](./assets/Screenshot%202025-03-23%20at%202.41.49 PM.png)
+
+    ![SSH Key Gen 3](./assets/Screenshot%202025-03-23%20at%202.42.03 PM.png)
+
+
 ### Step 2
 
 You can run the following commands from the root directory in the terminal:
@@ -114,15 +123,15 @@ packer build example_packer.pkr.hcl
 
 These steps will first initialize the Packer configuration by downloading the AWS plugin as defined in `example_packer.pkr.hcl`, which is our Packer configuration file. Then, Packer will format the template(s) in the current directory and validate the configurations. Finally, Packer will build the AMI and push the image to your AWS account. ([source](https://developer.hashicorp.com/packer/tutorials/aws-get-started/aws-get-started-build-image))
 
-![Packer Init](./assets/packer_init.png)
+![Packer Init](./assets/Screenshot%202025-03-23%20at%202.06.55 PM.png)
 
-![Packer Build Start](./assets/Screenshot%202025-03-21%20at%2010.48.03 PM.png)
+![Packer Build Start](./assets/Screenshot%202025-03-23%20at%202.07.18 PM.png)
 
-![Packer Image VM Start](./assets/Screenshot%202025-03-21%20at%2010.48.21 PM.png)
+![Temp EC2 Created](./assets/Screenshot%202025-03-23%20at%202.07.48 PM.png)
 
-![Packer Build Finished](./assets/Screenshot%202025-03-21%20at%2010.51.13 PM.png)
+![AMI Created](./assets/Screenshot%202025-03-23%20at%202.11.00 PM.png)
 
-![AMI in Console](./assets/Screenshot%202025-03-21%20at%2010.51.24 PM.png)
+![Packer Build Finished](./assets/Screenshot%202025-03-23%20at%202.11.09 PM.png)
 
 ### Step 3
 
@@ -134,7 +143,7 @@ Before running the Terraform files, you need to go into `example_variables.tf` a
 
 - custom_ami_id
 
-    Navigate to your AWS Console once Packer build has been run and go to EC2 -> AMIs and copy the AMI ID that has the name "packer-example" and put it in line 15.
+    Navigate to your AWS Console once Packer build has been run and go to EC2 -> AMIs and copy the AMI ID that has the name "packer-example" and put it in line 15. Example from Step 2's screenshot would be `ami-01cfbdddacfff61cf`.
 
 - bastion_ssh_key
 
@@ -159,21 +168,33 @@ Enter `yes` during the apply step to confirm that the infrastructure should be c
 
 These steps will first initialize the terraform directory and downloads the `aws` provider. Then it will format and valide your configuration to ensure they are valid. Finally it will create the infrastructure defined in the configuration in your AWS environment. 
 
-![Terraform Init](./assets/Screenshot%202025-03-21%20at%2011.37.22 PM.png)
+![Terraform Init](./assets/Screenshot%202025-03-23%20at%202.12.52 PM.png)
 
-![Terraform Validate and Apply](./assets/Screenshot%202025-03-22%20at%2012.40.04 AM.png)
+![Terraform Fmt/Validate](./assets/Screenshot%202025-03-23%20at%202.13.08 PM.png)
+
+![Terraform Apply Start](./assets/Screenshot%202025-03-23%20at%202.13.32 PM.png)
+
+![Terraform Apply Complete](./assets/Screenshot%202025-03-23%20at%202.15.57 PM.png)
 
 ### Step 5 (Results)
 
 You should now see the infrastructure created.
 
-![Terraform Complete](./assets/Screenshot%202025-03-22%20at%2012.40.16 AM.png)
-
 VPC:
 
-Bastion Host:
+![VPC](./assets/Screenshot%202025-03-23%20at%202.16.23 PM.png)
 
-Private EC2 Instances:
+Subnets:
+
+![Subnets](./assets/Screenshot%202025-03-23%20at%202.16.50 PM.png)
+
+Bastion Host and Private EC2 Instances:
+
+![EC2s](./assets/Screenshot%202025-03-23%20at%202.16.04 PM.png)
+
+Elastic IP:
+
+![Elastic IP](./assets/Screenshot%202025-03-23%20at%202.16.59 PM.png)
 
 You can ssh into your bastion host using the following command:
 ```
@@ -187,9 +208,23 @@ Once inside the bastion host, you can further ssh into any of the private EC2 in
 ssh ec2-user@<PRIVATE_EC2_INSTANCE_IP>
 ```
 
+Example if using `vockey` for both bastion host and private EC2 instances:
+![SSH Into Bastion Host](./assets/Screenshot%202025-03-23%20at%202.18.19 PM.png)
+
+![SSH Into Private EC2](./assets/Screenshot%202025-03-23%20at%202.18.48 PM.png)
+
+Example if using `vockey` for bastion host and `private_ec2_key` for private EC2 instances:
+![SSH Into Bastion Host](./assets/Screenshot%202025-03-23%20at%202.51.21 PM.png)
+
+![SSH Into Private EC2](./assets/Screenshot%202025-03-23%20at%202.51.51 PM.png)
+
 ### Step 6 (Clean Up)
 
 Once you are done, delete all created infrastructure by running `terraform destroy` in the terminal. Again, enter `yes` to confirm.
+
+![Terraform Destroy 1](./assets/Screenshot%202025-03-23%20at%202.20.15 PM.png)
+
+![Terraform Destroy 2](./assets/Screenshot%202025-03-23%20at%202.21.03 PM.png)
 
 Delete the AMI that was created as well during the packer process to avoid additional charges.
 
@@ -201,6 +236,8 @@ It will automatically use the default `vockey` as the SSH Key for ssh into the b
 
 So to run the example in this repository, first ensure `setup_script.sh` is executable by running `chmod +x setup_script.sh`, then run `./setup_script.sh` in the terminal.
 
+![Auto Script 1](./assets/Screenshot%202025-03-23%20at%203.05.49 PM.png)
+
 Once all is done, simply run the following commands:
 
 ```
@@ -210,78 +247,22 @@ terraform validate
 terraform apply
 ```
 
-Inspect your created infrastructure in the AWS Console.
+Inspect your created infrastructure in the AWS Console. You can ssh into your bastion host using the following command:
+```
+chmod 600 <PEM_FILE_FOR_BASTION_HOST>
+ssh-add ./ssh_key/private_ec2_key
+ssh -A -i <PEM_FILE_FOR_BASTION_HOST> ec2-user@<BASTION_HOST_IP>
+```
+
+![Auto Script 2](./assets/Screenshot%202025-03-23%20at%203.16.30 PM.png)
+
+Once inside the bastion host, you can further ssh into any of the private EC2 instances by simply running:
+```
+ssh ec2-user@<PRIVATE_EC2_INSTANCE_IP>
+```
+
+![Auto Script 3](./assets/Screenshot%202025-03-23%20at%203.16.57 PM.png)
 
 Once you are done, delete all created infrastructure by running `terraform destroy` in the terminal. Again, enter `yes` to confirm.
 
 Delete the AMI that was created as well during the packer process to avoid additional charges.
-
-## Steps
-
-1. Install Packer 
-https://developer.hashicorp.com/packer/install
-https://developer.hashicorp.com/packer/tutorials/aws-get-started/get-started-install-cli
-
-```
-brew tap hashicorp/tap
-```
-
-```
-brew install hashicorp/tap/packer
-```
-
-```
-packer
-```
-
-
-
-2. Created `example_packer.pkr.hcl`
-
-3. do `aws configure` and `aws configure set aws_session_token <SESSION_TOKEN_HERE>`
-
-4. `packer init .`
-
-5. `packer fmt .`
-
-6. `packer build example_packer.pkr.hcl`
-
-7. download Terraform https://developer.hashicorp.com/terraform/install?product_intent=terraform
-
-```
-brew install hashicorp/tap/terraform
-```
-
-```
-terraform -help
-```
-
-8. create terraform.tf
-
-**MANUAL STEPS**
-9. `terraform init`
-
-10. get the .pem file then run `ssh-keygen -y -f labsuser.pem` and put it in bastion_host.tf spot
-- put in vars along with own ip address
-
-
-11. `terraform validate`
-
-12. `terraform apply`
-
-13. try ssh into bastion host then jump to the private ec2s
-`ssh-add labsuser.pem`
-`ssh -A -i labsuser.pem ec2-user@<BASTION_HOST_IP>`
-
-
-**MANUAL STEPS END**
-
-
-
-## At End
-
-`terraform destroy`
-
-
-TO DO 
-add outbound rule for bastion-security-group

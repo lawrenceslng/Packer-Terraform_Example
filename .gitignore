@@ -5,3 +5,6 @@ labsuser.ppk
 .terraform*
 
 terraform*
+
+ssh_key/
+*.bak
