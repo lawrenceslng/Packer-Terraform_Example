@@ -105,8 +105,10 @@ Decide if you want to use the provided default SSH key or generate your own for 
 
     ![SSH Key Gen 1](./assets/Screenshot%202025-03-23%20at%202.41.20 PM.png)
 
+    The SSH public key is automatically inserted into `example_packer.pkr.hcl` as shown below:
     ![SSH Key Gen 2](./assets/Screenshot%202025-03-23%20at%202.41.49 PM.png)
 
+    The SSH key is uploaded to AWS:
     ![SSH Key Gen 3](./assets/Screenshot%202025-03-23%20at%202.42.03 PM.png)
 
 
@@ -127,10 +129,13 @@ These steps will first initialize the Packer configuration by downloading the AW
 
 ![Packer Build Start](./assets/Screenshot%202025-03-23%20at%202.07.18 PM.png)
 
+A temporary EC2 is created by Packer to create the AMI:
 ![Temp EC2 Created](./assets/Screenshot%202025-03-23%20at%202.07.48 PM.png)
 
+AMI is created:
 ![AMI Created](./assets/Screenshot%202025-03-23%20at%202.11.00 PM.png)
 
+Successful Packer build:
 ![Packer Build Finished](./assets/Screenshot%202025-03-23%20at%202.11.09 PM.png)
 
 ### Step 3
@@ -266,3 +271,7 @@ ssh ec2-user@<PRIVATE_EC2_INSTANCE_IP>
 Once you are done, delete all created infrastructure by running `terraform destroy` in the terminal. Again, enter `yes` to confirm.
 
 Delete the AMI that was created as well during the packer process to avoid additional charges.
+
+## Conclusion
+
+We successfully demonstrated the use of Packer and Terraform to create a custom AWS AMI and provision AWS resources. Let me know if you have any questions!
