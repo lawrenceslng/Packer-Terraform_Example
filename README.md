@@ -1,36 +1,25 @@
-# Packer and Terraform Example
+# Multi-OS EC2 Configuration with Ansible (Assignment 10)
 
-This repository demonstrates the use of [Packer](https://www.packer.io/) and [Terraform](https://www.terraform.io/) as Infrastructure as Code (IaC) tools. 
+This repository demonstrates the use of [Ansible](https://github.com/ansible/ansible).
 
-Packer is a VM image creation tool that enables you to automate the process of image creations, such as an Amazon Machine Image (AMI).
+The assignment description is below:
 
-Terraform is a tool to automate infrastructure provision and manage resources in any cloud environment.
+- Update your previous Terraform assignment to provision 6 EC2: 3 Ubuntu and 3 Amazon Linux. Tag them with (OS: ubuntu or OS:amazon). 1 more EC2 instance to host the Ansible Controller
 
-In this example, we use Packer to create a custom AWS AMI that uses Amazon Linux with Docker installed. We then use Terraform to provision an AWS VPC along with its public/private subnets, a bastion host accessible only by our own IP address, and 6 EC2 instances in the private subnet that uses the AMI created from Packer.
+- Create an Ansible Playbook for the 6 EC2 instance
+
+- Target the 6 ec2 instances and perform the following:
+    - Update and upgrade the packages (if needed)
+    - Verify we are running the latest docker
+    - Report the disk usage for each ec2 instance
+
+Update your repo with a new branch and update the README file for me to follow the instructions so I can run the terraform provisioning and the ansible playbook.
 
 **Note:** Example and usage steps below are written for the AWS Academy Learner Lab and MacOS environment. There may be slight changes needed to run in other environments.
 
 ## Prerequisites
 
-Clone this repository and `cd` into the root directory. You can follow along with either the manual steps or the semi-automated steps. But before starting, you should make sure you have the following installed:
-
-- Packer
-
-    Download Packer using the link and instructions here: https://developer.hashicorp.com/packer/install
-
-    For MacOS users using homebrew, you can simply run the following commands:
-    ```
-    brew tap hashicorp/tap
-    brew install hashicorp/tap/packer
-    ```
-
-    Run `packer` in the terminal to verify installation is successful
-
-    ![Packer Install 1](./assets/Screenshot%202025-03-21%20at%2010.43.45 PM.png)
-    
-    ![Packer Install 2](./assets/Screenshot%202025-03-21%20at%2010.43.57 PM.png)
-    
-    ![Packer Install 3](./assets/Screenshot%202025-03-21%20at%2010.44.08 PM.png)
+Clone this repository and `cd` into the root directory. Before starting, you should make sure you have the following installed:
 
 - Terraform
 

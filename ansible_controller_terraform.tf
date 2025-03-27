@@ -1,5 +1,5 @@
-resource "aws_security_group" "bastion-sg" {
-  name   = "bastion-security-group"
+resource "aws_security_group" "ansible-sg" {
+  name   = "ansible-controller-security-group"
   vpc_id = module.vpc.vpc_id
 
   ingress {
@@ -26,6 +26,6 @@ resource "aws_instance" "bastion" {
   associate_public_ip_address = true
 
   tags = {
-    Name = "Bastion Host"
+    Name = "Ansible Controller"
   }
 }
