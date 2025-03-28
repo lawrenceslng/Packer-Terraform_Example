@@ -40,13 +40,10 @@ Clone this repository and `cd` into the root directory. Before starting, you sho
     Download AWS CLI using the link and instructions here:
     https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
 
-    Configure your AWS CLI using Short-term credentials as shown here (if doing manual usage):
-    https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html
-
-    Or simply run the following commands and follow the instructions:
+    Run the following commands to input your credentials from Learner's Lab:
     ```
     aws configure
-    aws configure set aws_session_token <SYOUR_ESSION_TOKEN_HERE>
+    aws configure set aws_session_token <YOUR_SESSION_TOKEN_HERE>
     ```
 
     ![AWS CONFIGURE](./assets/Screenshot%202025-03-21%20at%2010.44.18 PM.png)
@@ -63,91 +60,21 @@ You can run the examples in this repository manually.
 
 ### Step 1
 
-Decide if you want to use the provided default SSH key or generate your own for use with your bastion host and/or private EC2 instances.
-
-- If you want to use the default SSH key (vockey) to ssh into the private EC2 instances, run the following from the root directory in the terminal:
-    ```
-    ssh-keygen -y -f <PEM file>
-    ```
-    where `<PEM file>` is the default SSH key you downloaded during the prerequisite steps.
-
-    Copy the output and replace the string `REPLACE_WITH_YOUR_PUBLIC_KEY` in `example_packer.pkr.hcl` with the output.
-
-    ![SSH Key Gen](./assets/Screenshot%202025-03-23%20at%202.06.34 PM.png)
-
-- If you want to generate your own SSH key and use that to ssh into the private EC2 instances, run the following from the root directory in the terminal:
-    ```
-    mkdir -p ./ssh_key
-
-    ssh-keygen -t rsa -b 4096 -f ./ssh_key/private_ec2_key -N ""
-
-    sed -i.bak "s|REPLACE_WITH_YOUR_PUBLIC_KEY|$(cat ./ssh_key/private_ec2_key.pub)|" example_packer.pkr.hcl
-
-    rm -f example_packer.pkr.hcl.bak
-
-    aws ec2 import-key-pair --key-name "private_ec2_key" --public-key-material fileb://ssh_key/private_ec2_key.pub
-
-    chmod 600 ./ssh_key/private_ec2_key
-    ```
-
-    This will create a new ssh key that is saved in `./ssh_key`, automatically replace the content in `example_packer.pkr.hcl`, and import the key pair to your AWS account.
-
-    ![SSH Key Gen 1](./assets/Screenshot%202025-03-23%20at%202.41.20 PM.png)
-
-    The SSH public key is automatically inserted into `example_packer.pkr.hcl` as shown below:
-    ![SSH Key Gen 2](./assets/Screenshot%202025-03-23%20at%202.41.49 PM.png)
-
-    The SSH key is uploaded to AWS:
-    ![SSH Key Gen 3](./assets/Screenshot%202025-03-23%20at%202.42.03 PM.png)
-
-
-### Step 2
-
-You can run the following commands from the root directory in the terminal:
-
-```
-packer init .
-packer fmt .
-packer validate .
-packer build example_packer.pkr.hcl
-```
-
-These steps will first initialize the Packer configuration by downloading the AWS plugin as defined in `example_packer.pkr.hcl`, which is our Packer configuration file. Then, Packer will format the template(s) in the current directory and validate the configurations. Finally, Packer will build the AMI and push the image to your AWS account. ([source](https://developer.hashicorp.com/packer/tutorials/aws-get-started/aws-get-started-build-image))
-
-![Packer Init](./assets/Screenshot%202025-03-23%20at%202.06.55 PM.png)
-
-![Packer Build Start](./assets/Screenshot%202025-03-23%20at%202.07.18 PM.png)
-
-A temporary EC2 is created by Packer to create the AMI:
-![Temp EC2 Created](./assets/Screenshot%202025-03-23%20at%202.07.48 PM.png)
-
-AMI is created:
-![AMI Created](./assets/Screenshot%202025-03-23%20at%202.11.00 PM.png)
-
-Successful Packer build:
-![Packer Build Finished](./assets/Screenshot%202025-03-23%20at%202.11.09 PM.png)
-
-### Step 3
-
 Before running the Terraform files, you need to go into `example_variables.tf` and double check/replace the following variables:
 
 - bastion_ingress_ip_address
 
     Put your public facing IP address in line 3 with `/32` appended. You can find your IP address using `curl -4 ifconfig.me` in your terminal or using https://whatismyipaddress.com/. Example: `8.8.8.8/32`
 
-- custom_ami_id
-
-    Navigate to your AWS Console once Packer build has been run and go to EC2 -> AMIs and copy the AMI ID that has the name "packer-example" and put it in line 15. Example from Step 2's screenshot would be `ami-01cfbdddacfff61cf`.
-
-- bastion_ssh_key
+<!-- - bastion_ssh_key
 
     Replace line 21 with the name of your SSH Key that you intend to use to ssh into the bastion host. In the Learner's Lab, `vockey` is the default SSH key already created, so we will use this to log into the bastion host, but you can replace with a different one that exists if you want.
 
 - private_ssh_key
 
-    Replace line 27 with the name of your SSH Key that you intend to use to ssh into the private EC2 instances (via your bastion host). Use `vockey` if you are using the default SSH Key or use `private_ec2_key` if you generated your own during step 1.
+    Replace line 27 with the name of your SSH Key that you intend to use to ssh into the private EC2 instances (via your bastion host). Use `vockey` if you are using the default SSH Key or use `private_ec2_key` if you generated your own during step 1. -->
 
-### Step 4
+### Step 2
 
 Now you can run the commands:
 
@@ -170,7 +97,11 @@ These steps will first initialize the terraform directory and downloads the `aws
 
 ![Terraform Apply Complete](./assets/Screenshot%202025-03-23%20at%202.15.57 PM.png)
 
-### Step 5 (Results)
+### Step 3
+
+`scp ansible_playbook.yaml aws_ec2.yaml ec2-user@<ANSIBLE_CONTROLLER_IP>:~`
+
+### Step 4
 
 You should now see the infrastructure created.
 
@@ -211,6 +142,22 @@ Example if using `vockey` for bastion host and `private_ec2_key` for private EC2
 ![SSH Into Bastion Host](./assets/Screenshot%202025-03-23%20at%202.51.21 PM.png)
 
 ![SSH Into Private EC2](./assets/Screenshot%202025-03-23%20at%202.51.51 PM.png)
+
+### Step 5
+
+do 
+
+```
+curl -O https://bootstrap.pypa.io/get-pip.py
+python3 get-pip.py --user
+pip3 install --user boto3 botocore
+
+aws configure
+aws configure set aws_session_token <SESSION_TOKEN_HERE>
+
+export ANSIBLE_HOST_KEY_CHECKING=False
+```
+in the Ansible controller
 
 ### Step 6 (Clean Up)
 

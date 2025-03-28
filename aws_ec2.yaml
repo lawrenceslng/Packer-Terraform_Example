@@ -1,0 +1,14 @@
+plugin: amazon.aws.aws_ec2
+regions:
+  - us-east-1       # Change to your region
+keyed_groups:
+  - key: tags.OS
+    prefix: ""
+    separator: ""
+filters:
+  tag:OS:
+    - ubuntu
+    - amazon
+compose:
+  ansible_user: |
+    (tags.OS == 'ubuntu') | ternary('ubuntu', 'ec2-user')

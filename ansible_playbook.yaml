@@ -1,0 +1,57 @@
+- name: Perform maintenance on Ubuntu instances
+  hosts: ubuntu
+  gather_facts: yes
+  become: yes
+
+  tasks:
+    - name: Update and upgrade packages (Ubuntu)
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Ensure Docker is installed (Ubuntu)
+      apt:
+        name: docker.io
+        state: latest
+
+    - name: Start and enable Docker service (Ubuntu)
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+- name: Perform maintenance on Amazon Linux instances
+  hosts: amazon
+  gather_facts: yes
+  become: yes
+
+  tasks:
+    - name: Update and upgrade packages (Amazon Linux)
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Ensure Docker is installed (Amazon Linux)
+      yum:
+        name: docker
+        state: latest
+
+    - name: Start and enable Docker service (Amazon Linux)
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+- name: Collect disk usage from all instances
+  hosts: all
+  gather_facts: yes
+  become: yes
+
+  tasks:
+    - name: Get disk usage
+      command: df -h
+      register: disk_usage
+
+    - name: Report disk usage
+      debug:
+        msg: "{{ disk_usage.stdout_lines }}"

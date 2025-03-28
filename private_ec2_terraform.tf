@@ -10,35 +10,37 @@ resource "aws_security_group" "private-ec2-sg" {
   }
 
   egress {
-    protocol    = "-1"  # All protocols
-    from_port   = 0     # All ports
-    to_port     = 0     # All ports
+    protocol    = "-1" # All protocols
+    from_port   = 0    # All ports
+    to_port     = 0    # All ports
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
 resource "aws_instance" "private_ubuntu_instances" {
-  count                       = 3
-  ami                         = ""
-  key_name                    = var.private_ssh_key
-  instance_type               = "t2.micro"
-  subnet_id                   = module.vpc.private_subnets[0]
-  vpc_security_group_ids      = [aws_security_group.private-ec2-sg.id]
+  count                  = 1
+  ami                    = "ami-084568db4383264d4"
+  key_name               = var.private_ssh_key
+  instance_type          = "t2.micro"
+  subnet_id              = module.vpc.private_subnets[0]
+  vpc_security_group_ids = [aws_security_group.private-ec2-sg.id]
 
   tags = {
     Name = "private-ubuntu-${count.index + 1}"
+    OS   = "ubuntu"
   }
 }
 
 resource "aws_instance" "private_amazon_linux_instances" {
-  count                       = 3
-  ami                         = "ami-08b5b3a93ed654d19"
-  key_name                    = var.private_ssh_key
-  instance_type               = "t2.micro"
-  subnet_id                   = module.vpc.private_subnets[0]
-  vpc_security_group_ids      = [aws_security_group.private-ec2-sg.id]
+  count                  = 1
+  ami                    = "ami-08b5b3a93ed654d19"
+  key_name               = var.private_ssh_key
+  instance_type          = "t2.micro"
+  subnet_id              = module.vpc.private_subnets[0]
+  vpc_security_group_ids = [aws_security_group.private-ec2-sg.id]
 
   tags = {
     Name = "private-amazon_linux-${count.index + 1}"
+    OS   = "amazon"
   }
 }
