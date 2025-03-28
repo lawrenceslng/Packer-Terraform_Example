@@ -18,7 +18,7 @@ resource "aws_security_group" "private-ec2-sg" {
 }
 
 resource "aws_instance" "private_ubuntu_instances" {
-  count                  = 1
+  count                  = 3
   ami                    = "ami-084568db4383264d4"
   key_name               = var.private_ssh_key
   instance_type          = "t2.micro"
@@ -32,7 +32,7 @@ resource "aws_instance" "private_ubuntu_instances" {
 }
 
 resource "aws_instance" "private_amazon_linux_instances" {
-  count                  = 1
+  count                  = 3
   ami                    = "ami-08b5b3a93ed654d19"
   key_name               = var.private_ssh_key
   instance_type          = "t2.micro"

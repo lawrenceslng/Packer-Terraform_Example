@@ -19,7 +19,11 @@ Update your repo with a new branch and update the README file for me to follow t
 
 ## Prerequisites
 
-Clone this repository and `cd` into the root directory. Before starting, you should make sure you have the following installed:
+Clone this repository by branch with the following command:
+
+`git clone --single-branch --branch assignment10 git@github.com:lawrenceslng/Packer-Terraform_Example.git`
+
+and `cd` into the root directory. Before starting, you should make sure you have the following installed:
 
 - Terraform
 
@@ -27,7 +31,7 @@ Clone this repository and `cd` into the root directory. Before starting, you sho
 
     For MacOS users using homebrew, you can simply run the following commands:
     ```
-    brew tap hashicorp/tap                  # if not already run
+    brew tap hashicorp/tap          
     brew install hashicorp/tap/terraform
     ```
 
@@ -50,7 +54,7 @@ Clone this repository and `cd` into the root directory. Before starting, you sho
 
 - Download the SSH Key from Learner Lab
 
-    You can download the PEM file containing the default SSH Key (vockey) from Learner's Lab into the root directory of this repository for use later. Make sure to run `chmod 600 <PEM file>` to make it have the correct permissions for ssh use later.
+    You should download the PEM file containing the default SSH Key (vockey) from Learner's Lab into the root directory of this repository for use later. Make sure to run `chmod 600 <PEM_FILE>` to make it have the correct permissions for ssh use later.
 
     ![SSH Key Download](./assets/image.png)
 
@@ -60,19 +64,11 @@ You can run the examples in this repository manually.
 
 ### Step 1
 
-Before running the Terraform files, you need to go into `example_variables.tf` and double check/replace the following variables:
+Before running the Terraform files, you need to go into `variables.tf` and double check/replace the following variables:
 
-- bastion_ingress_ip_address
+- ansible_ingress_ip_address
 
     Put your public facing IP address in line 3 with `/32` appended. You can find your IP address using `curl -4 ifconfig.me` in your terminal or using https://whatismyipaddress.com/. Example: `8.8.8.8/32`
-
-<!-- - bastion_ssh_key
-
-    Replace line 21 with the name of your SSH Key that you intend to use to ssh into the bastion host. In the Learner's Lab, `vockey` is the default SSH key already created, so we will use this to log into the bastion host, but you can replace with a different one that exists if you want.
-
-- private_ssh_key
-
-    Replace line 27 with the name of your SSH Key that you intend to use to ssh into the private EC2 instances (via your bastion host). Use `vockey` if you are using the default SSH Key or use `private_ec2_key` if you generated your own during step 1. -->
 
 ### Step 2
 
@@ -91,123 +87,55 @@ These steps will first initialize the terraform directory and downloads the `aws
 
 ![Terraform Init](./assets/Screenshot%202025-03-23%20at%202.12.52 PM.png)
 
-![Terraform Fmt/Validate](./assets/Screenshot%202025-03-23%20at%202.13.08 PM.png)
-
-![Terraform Apply Start](./assets/Screenshot%202025-03-23%20at%202.13.32 PM.png)
-
-![Terraform Apply Complete](./assets/Screenshot%202025-03-23%20at%202.15.57 PM.png)
-
 ### Step 3
+
+You should now see the infrastructure created if you log into the AWS console.
+
+Find the public IP address of the EC2 machine named `ansible-controller`. Run the following command in the root directory of this repository:
 
 `scp ansible_playbook.yaml aws_ec2.yaml ec2-user@<ANSIBLE_CONTROLLER_IP>:~`
 
+This will copy over the Ansible playbook and dynamic inventory file over to the machine.
+
 ### Step 4
 
-You should now see the infrastructure created.
+You can now ssh into the Ansible Controller using the following command:
 
-VPC:
-
-![VPC](./assets/Screenshot%202025-03-23%20at%202.16.23 PM.png)
-
-Subnets:
-
-![Subnets](./assets/Screenshot%202025-03-23%20at%202.16.50 PM.png)
-
-Bastion Host and Private EC2 Instances:
-
-![EC2s](./assets/Screenshot%202025-03-23%20at%202.16.04 PM.png)
-
-Elastic IP:
-
-![Elastic IP](./assets/Screenshot%202025-03-23%20at%202.16.59 PM.png)
-
-You can ssh into your bastion host using the following command:
 ```
-chmod 600 <PEM_FILE_FOR_BASTION_HOST>
-ssh-add <PEM_FILE_FOR_PRIVATE_EC2_INSTANCES>
-ssh -A -i <PEM_FILE_FOR_BASTION_HOST> ec2-user@<BASTION_HOST_IP>
+chmod 600 <PEM_FILE>
+ssh-add <PEM_FILE>
+ssh -A -i <PEM_FILE> ec2-user@<ANSIBLE_CONTROLLER_IP>
 ```
 
-Once inside the bastion host, you can further ssh into any of the private EC2 instances by simply running:
+Configure AWS Credentials by running: 
+
 ```
-ssh ec2-user@<PRIVATE_EC2_INSTANCE_IP>
+aws configure
+aws configure set aws_session_token <SESSION_TOKEN_HERE>
 ```
-
-Example if using `vockey` for both bastion host and private EC2 instances:
-![SSH Into Bastion Host](./assets/Screenshot%202025-03-23%20at%202.18.19 PM.png)
-
-![SSH Into Private EC2](./assets/Screenshot%202025-03-23%20at%202.18.48 PM.png)
-
-Example if using `vockey` for bastion host and `private_ec2_key` for private EC2 instances:
-![SSH Into Bastion Host](./assets/Screenshot%202025-03-23%20at%202.51.21 PM.png)
-
-![SSH Into Private EC2](./assets/Screenshot%202025-03-23%20at%202.51.51 PM.png)
 
 ### Step 5
 
-do 
+You are now ready to run the playbook. Run the following command in the Ansible Controller EC2 machine:
 
 ```
-curl -O https://bootstrap.pypa.io/get-pip.py
-python3 get-pip.py --user
-pip3 install --user boto3 botocore
-
-aws configure
-aws configure set aws_session_token <SESSION_TOKEN_HERE>
-
-export ANSIBLE_HOST_KEY_CHECKING=False
+ansible-playbook -i aws_ec2.yaml ansible_playbook.yaml
 ```
-in the Ansible controller
 
-### Step 6 (Clean Up)
+Type `yes` when it asks for you to confirm you want to connect to the various private EC2 instances. 
+
+### Step 6
+
+You can login to each of the private EC2 instances and verify that docker is installed by running the command:
+
+```
+sudo docker ps
+```
+
+### Step 7 (Clean Up)
 
 Once you are done, delete all created infrastructure by running `terraform destroy` in the terminal. Again, enter `yes` to confirm.
-
-![Terraform Destroy 1](./assets/Screenshot%202025-03-23%20at%202.20.15 PM.png)
-
-![Terraform Destroy 2](./assets/Screenshot%202025-03-23%20at%202.21.03 PM.png)
-
-Delete the AMI that was created as well during the packer process to avoid additional charges.
-
-## Semi-Automated Usage
-
-A script has been provided for MacOS users to do some of the above manual steps more easily. It will check if prerequisites are installed, ask for AWS credentials and run `aws configure`, run the Packer commands, and replace the necessary variables in `example_variables.tf` programmatically.
-
-It will automatically use the default `vockey` as the SSH Key for ssh into the bastion host and create a separate key for the private EC2 instances.
-
-So to run the example in this repository, first ensure `setup_script.sh` is executable by running `chmod +x setup_script.sh`, then run `./setup_script.sh` in the terminal.
-
-![Auto Script 1](./assets/Screenshot%202025-03-23%20at%203.05.49 PM.png)
-
-Once all is done, simply run the following commands:
-
-```
-terraform init
-terraform fmt
-terraform validate
-terraform apply
-```
-
-Inspect your created infrastructure in the AWS Console. You can ssh into your bastion host using the following command:
-```
-chmod 600 <PEM_FILE_FOR_BASTION_HOST>
-ssh-add ./ssh_key/private_ec2_key
-ssh -A -i <PEM_FILE_FOR_BASTION_HOST> ec2-user@<BASTION_HOST_IP>
-```
-
-![Auto Script 2](./assets/Screenshot%202025-03-23%20at%203.16.30 PM.png)
-
-Once inside the bastion host, you can further ssh into any of the private EC2 instances by simply running:
-```
-ssh ec2-user@<PRIVATE_EC2_INSTANCE_IP>
-```
-
-![Auto Script 3](./assets/Screenshot%202025-03-23%20at%203.16.57 PM.png)
-
-Once you are done, delete all created infrastructure by running `terraform destroy` in the terminal. Again, enter `yes` to confirm.
-
-Delete the AMI that was created as well during the packer process to avoid additional charges.
 
 ## Conclusion
 
-We successfully demonstrated the use of Packer and Terraform to create a custom AWS AMI and provision AWS resources. Let me know if you have any questions!
+We have successfully used Ansible to configure machines to install and run the latest version of Docker and report back their disk usages!
