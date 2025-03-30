@@ -91,7 +91,7 @@ These steps will first initialize the terraform directory and downloads the `aws
 
 You should now see the infrastructure created if you log into the AWS console.
 
-![Created Infrastructure](./assets/Screenshot%202025-03-30%20at%201.59.33 PM.png)
+![Created Infrastructure](./assets/Screenshot%202025-03-30%20at%202.36.30 PM.png)
 
 Find the public IP address of the EC2 machine named `ansible-controller`. Run the following command in the root directory of this repository:
 
@@ -99,9 +99,9 @@ Find the public IP address of the EC2 machine named `ansible-controller`. Run th
 
 This will copy over the Ansible playbook and dynamic inventory file over to the machine.
 
-![Ansible Controller](./assets/Screenshot%202025-03-30%20at%201.59.42 PM.png)
+![Ansible Controller](./assets/Screenshot%202025-03-30%20at%202.36.42 PM.png)
 
-![SCP Command](./assets/Screenshot%202025-03-30%20at%202.00.56 PM.png)
+![SCP Command](./assets/Screenshot%202025-03-30%20at%202.36.56 PM.png)
 
 ### Step 4
 
@@ -112,8 +112,6 @@ chmod 600 <PEM_FILE>
 ssh-add <PEM_FILE>
 ssh -A -i <PEM_FILE> ec2-user@<ANSIBLE_CONTROLLER_IP>
 ```
-
-![SSH Into Ansible Controller](./assets/Screenshot%202025-03-30%20at%202.01.27 PM.png)
 
 Configure AWS Credentials in the Ansible Controller by running: 
 
@@ -132,6 +130,12 @@ ansible-playbook -i aws_ec2.yaml ansible_playbook.yaml -e 'ansible_ssh_common_ar
 
 Type `yes` when it asks for you to confirm you want to connect to the various private EC2 instances. 
 
+![Ansible Playbook 1](./assets/Screenshot%202025-03-30%20at%202.40.47 PM.png)
+
+![Ansible Playbook 2](./assets/Screenshot%202025-03-30%20at%202.40.57 PM.png)
+
+![Ansible Playbook 3](./assets/Screenshot%202025-03-30%20at%202.41.12 PM.png)
+
 ### Step 6
 
 You can login to each of the private EC2 instances and verify that docker is installed by running the command:
@@ -139,6 +143,8 @@ You can login to each of the private EC2 instances and verify that docker is ins
 ```
 sudo docker ps
 ```
+
+![Ansible Playbook 4](./assets/Screenshot%202025-03-30%20at%202.41.41 PM.png)
 
 ### Step 7 (Clean Up)
 
