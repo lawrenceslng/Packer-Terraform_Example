@@ -128,7 +128,7 @@ You are now ready to run the playbook. Run the following command in the Ansible 
 ansible-playbook -i aws_ec2.yaml ansible_playbook.yaml -e 'ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"'
 ```
 
-Type `yes` when it asks for you to confirm you want to connect to the various private EC2 instances. 
+The extra arguments allow you to ssh into the private instances and bypass SSH fingerprint confirmation.
 
 ![Ansible Playbook 1](./assets/Screenshot%202025-03-30%20at%202.40.47 PM.png)
 
