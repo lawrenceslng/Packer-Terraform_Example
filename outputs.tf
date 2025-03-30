@@ -32,3 +32,13 @@ output "azs" {
   description = "A list of availability zones spefified as argument to this module"
   value       = module.vpc.azs
 }
+
+output "private_ubuntu_instance_ips" {
+  description = "Private IP addresses of the Ubuntu instances"
+  value       = aws_instance.private_ubuntu_instances[*].private_ip
+}
+
+output "private_amazon_linux_instance_ips" {
+  description = "Private IP addresses of the Amazon Linux instances"
+  value       = aws_instance.private_amazon_linux_instances[*].private_ip
+}

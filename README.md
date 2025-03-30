@@ -85,17 +85,23 @@ Enter `yes` during the apply step to confirm that the infrastructure should be c
 
 These steps will first initialize the terraform directory and downloads the `aws` provider. Then it will format and valide your configuration to ensure they are valid. Finally it will create the infrastructure defined in the configuration in your AWS environment. 
 
-![Terraform Init](./assets/Screenshot%202025-03-23%20at%202.12.52 PM.png)
+![Terraform Init](./assets/Screenshot%202025-03-30%20at%201.57.43 PM.png)
 
 ### Step 3
 
 You should now see the infrastructure created if you log into the AWS console.
+
+![Created Infrastructure](./assets/Screenshot%202025-03-30%20at%201.59.33 PM.png)
 
 Find the public IP address of the EC2 machine named `ansible-controller`. Run the following command in the root directory of this repository:
 
 `scp ansible_playbook.yaml aws_ec2.yaml ec2-user@<ANSIBLE_CONTROLLER_IP>:~`
 
 This will copy over the Ansible playbook and dynamic inventory file over to the machine.
+
+![Ansible Controller](./assets/Screenshot%202025-03-30%20at%201.59.42 PM.png)
+
+![SCP Command](./assets/Screenshot%202025-03-30%20at%202.00.56 PM.png)
 
 ### Step 4
 
@@ -107,7 +113,9 @@ ssh-add <PEM_FILE>
 ssh -A -i <PEM_FILE> ec2-user@<ANSIBLE_CONTROLLER_IP>
 ```
 
-Configure AWS Credentials by running: 
+![SSH Into Ansible Controller](./assets/Screenshot%202025-03-30%20at%202.01.27 PM.png)
+
+Configure AWS Credentials in the Ansible Controller by running: 
 
 ```
 aws configure
@@ -119,7 +127,7 @@ aws configure set aws_session_token <SESSION_TOKEN_HERE>
 You are now ready to run the playbook. Run the following command in the Ansible Controller EC2 machine:
 
 ```
-ansible-playbook -i aws_ec2.yaml ansible_playbook.yaml
+ansible-playbook -i aws_ec2.yaml ansible_playbook.yaml -e 'ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"'
 ```
 
 Type `yes` when it asks for you to confirm you want to connect to the various private EC2 instances. 
